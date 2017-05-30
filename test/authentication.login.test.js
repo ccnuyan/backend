@@ -1,18 +1,19 @@
 import { expect } from 'chai';
 import Helpers from '../lib/helper';
-import authentication from '../services/authentication';
 
 const helpers = new Helpers();
 let pool = null;
 let registeredUser = null;
+const params = {
+  username: 'ccnuyan',
+  password: 'password',
+};
 
 describe('authentication', () => {
   before(async () => {
     pool = await helpers.initDb();
-    return authentication.register(pool, {
-      username: 'ccnuyan',
-      password: 'password',
-    }).then((res) => {
+    return pool.query('select * from membership.register($1, $2)', [params.username, params.password])
+    .then((res) => {
       registeredUser = res.rows[0];
       return registeredUser;
     });
@@ -21,10 +22,8 @@ describe('authentication', () => {
   describe('with a valid login', () => {
     let authResult = null;
     before(() => {
-      return authentication.authentiacate(pool, {
-        username: 'ccnuyan',
-        password: 'password',
-      }).then((res) => {
+      return pool.query('select * from membership.authenticate($1, $2)', [params.username, params.password])
+      .then((res) => {
         authResult = res.rows[0];
         return authResult;
       });
@@ -37,10 +36,8 @@ describe('authentication', () => {
   describe('invalid login', () => {
     let authResult = null;
     before(() => {
-      return authentication.authentiacate(pool, {
-        username: 'ccnuyan',
-        password: 'password1',
-      }).then((res) => {
+      return pool.query('select * from membership.authenticate($1, $2)', [params.username, 'password1'])
+      .then((res) => {
         authResult = res.rows[0];
         return authResult;
       });
@@ -53,9 +50,8 @@ describe('authentication', () => {
   describe('with a valid token', () => {
     let authResult = null;
     before(() => {
-      return authentication.authenticate_by_token(pool, {
-        token: registeredUser.authentication_token,
-      }).then((res) => {
+      return pool.query('select * from membership.authenticate_by_token($1)', [registeredUser.authentication_token])
+      .then((res) => {
         authResult = res.rows[0];
         return authResult;
       });
@@ -65,13 +61,3 @@ describe('authentication', () => {
     });
   });
 });
-
-
-// describe('release the pool', () => {
-//   before(() => {
-//     return pool.release();
-//   });
-//   it('released', () => {
-//     assert.equal(0, 0);
-//   });
-// });

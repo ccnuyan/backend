@@ -1,0 +1,4 @@
+ALTER TABLE channels
+ADD CONSTRAINT team_channels
+FOREIGN KEY (team_id) REFERENCES teams(id)
+ON DELETE CASCADE;

@@ -1,9 +1,14 @@
 import { expect } from 'chai';
 import Helpers from '../lib/helper';
-import authentication from '../services/authentication';
 
 const helpers = new Helpers();
 let pool = null;
+
+const params = {
+  username: 'newuser',
+  password: 'password',
+};
+
 
 describe('registration', () => {
   before(async () => {
@@ -12,10 +17,8 @@ describe('registration', () => {
   describe('with valid creds', () => {
     let regResult = null;
     before(() => {
-      return authentication.register(pool, {
-        username: 'test',
-        password: 'password',
-      }).then((res) => {
+      return pool.query('select * from membership.register($1, $2)', [params.username, params.password])
+      .then((res) => {
         regResult = res.rows[0];
         return regResult;
       });
@@ -30,7 +33,7 @@ describe('registration', () => {
       expect(regResult.role).to.equal(10);
     });
     it('returns correct username', () => {
-      expect(regResult.username).to.equal('test');
+      expect(regResult.username).to.equal(params.username);
     });
     it('return an authentication_token', () => {
       expect(regResult.authentication_token).to.exist;
@@ -39,10 +42,8 @@ describe('registration', () => {
   describe('trying an existing user', () => {
     let regResult = null;
     before(() => {
-      return authentication.register(pool, {
-        username: 'test',
-        password: 'password',
-      }).then((res) => {
+      return pool.query('select * from membership.register($1, $2)', [params.username, params.password])
+      .then((res) => {
         regResult = res.rows[0];
         return regResult;
       });
@@ -52,13 +53,3 @@ describe('registration', () => {
     });
   });
 });
-
-// describe('release the pool', () => {
-//   before(() => {
-//     return pool.release();
-//   });
-//   it('released', () => {
-//     console.log(pool);
-//     expect(pool).to.equal('released');
-//   });
-// });

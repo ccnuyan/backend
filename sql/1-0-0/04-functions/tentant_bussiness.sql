@@ -1,32 +1,32 @@
 -- get
 set search_path=membership;
 
-create or replace function get_tenants_by_ids(tids bigint[])
+create or replace function get_users_by_ids(uids bigint[])
 returns setof users
 as $$
 BEGIN
   set search_path=membership;
 
   return query
-  select * from users where users.id = any(tids);
+  select * from users where users.id = any(uids);
 END;
 $$ LANGUAGE plpgsql;
 
-create or replace function get_tenant_by_id(tid bigint)
+create or replace function get_user_by_id(uid bigint)
 returns users
 as $$
 DECLARE
-found_tenant users;
+found_user users;
 BEGIN
   set search_path=membership;
-  select * from tenants where users.id = tid into found_tenant;
-  return found_tenant;
+  select * from users where users.id = uid into found_user;
+  return found_user;
 END;
 $$ LANGUAGE plpgsql;
 
--- tenant_tenants
+-- user_users
 
-create or replace function get_all_tenants()
+create or replace function get_all_users()
 returns setof users
 as $$
 BEGIN
