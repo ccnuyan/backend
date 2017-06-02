@@ -1,11 +1,5 @@
 create or replace function authenticate(key varchar, token varchar, prov varchar default 'local')
-returns table(
-  id bigint,
-  username varchar(255),
-  role int,
-  success boolean,
-  message varchar(255)
-) as $$
+returns membership.login_info as $$
 DECLARE
   found_user membership.users;
   return_message varchar(50);
@@ -36,23 +30,24 @@ BEGIN
     return_message := 'Invalid login credentials';
   end if;
   
-  return query
-  select found_id, found_user.username, found_user.role, success, return_message;
+  return (found_user.id, 
+    found_user.username, 
+    found_user.college, 
+    found_user.student_id,
+    found_user.realname,
+    found_user.gender, 
+    found_user.role,  
+    success, 
+    return_message,
+    '')::membership.login_info;
 END;
 $$
 language plpgsql;
 
 create or replace function authenticate_by_token(token varchar)
-returns table(
-  id bigint,
-  username varchar(255),
-  role int,
-  success boolean,
-  message varchar(255)
-) as $$
+returns membership.login_info as $$
 begin
-  return query
-  select * from authenticate('token', token, 'token');
+  return authenticate('token', token, 'token');
 end;
 $$
 language plpgsql;

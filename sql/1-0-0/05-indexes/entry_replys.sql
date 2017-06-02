@@ -1,4 +1,0 @@
-ALTER TABLE replys
-ADD CONSTRAINT entry_replys
-FOREIGN KEY (entry_id) REFERENCES entrys(id)
-ON DELETE CASCADE;
